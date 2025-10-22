@@ -43,7 +43,15 @@ async def dingtalk_callback(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="钉钉认证失败"
         )
-    return result
+    
+    # 认证成功后，将token作为URL参数传递给前端回调页面
+    # 这样前端可以直接从URL中获取token，避免cookie传递的问题
+    callback_url = f"{settings.FRONTEND_BASE_URL}/auth/dingtalk/callback?access_token={result['access_token']}"
+    
+    # 创建重定向响应
+    response = RedirectResponse(callback_url)
+    
+    return response
 
 @router.get("/github/login")
 async def github_login():
@@ -69,7 +77,15 @@ async def github_callback(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="GitHub认证失败"
         )
-    return result
+    
+    # 认证成功后，将token作为URL参数传递给前端回调页面
+    # 这样前端可以直接从URL中获取token，避免cookie传递的问题
+    callback_url = f"{settings.FRONTEND_BASE_URL}/auth/github/callback?access_token={result['access_token']}"
+    
+    # 创建重定向响应
+    response = RedirectResponse(callback_url)
+    
+    return response
 
 @router.post("/register", response_model=UserResponse)
 async def register(user_create: UserCreate, db: Session = Depends(get_db)):

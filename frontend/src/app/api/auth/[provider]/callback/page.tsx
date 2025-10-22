@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { console } from 'inspector'
 
 export default function OAuthCallbackPage({ params }: { params: { provider: string } }) {
   const [isProcessing, setIsProcessing] = useState(true)
@@ -30,10 +31,35 @@ export default function OAuthCallbackPage({ params }: { params: { provider: stri
         }
         
         const data = await response.json()
-        
-        // 保存token到localStorage
-        if (data.access_token) {
-          localStorage.setItem('access_token', data.access_token)
+        console.log('API response data:', data)
+          
+          console.log('原始API数据结构:', JSON.stringify(data, null, 2))
+          
+          // 保存token
+          const token = data.access_token
+          if (!token) {
+            console.error('没有找到access_token')
+            throw new Error('未返回访问令牌')
+          }
+          
+          // 保存token到localStorage
+          localStorage.setItem('access_token', token)
+          console.log('Token已保存:', token)
+          
+          // 强制保存用户数据
+          try {
+            // 优先使用user对象
+            const userData = data.user || data
+            console.log('准备保存的用户数据:', userData)
+            localStorage.setItem('user', JSON.stringify(userData))
+            console.log('用户数据已保存到localStorage的user键')
+            
+            // 同时保存到旧的键名，确保兼容性
+            localStorage.setItem('github_user_data', JSON.stringify(userData))
+            console.log('用户数据也已保存到github_user_data键')
+          } catch (err) {
+            console.error('保存用户数据失败:', err)
+          }
           
           // 显示成功提示
           toast.success(`${provider === 'dingtalk' ? '钉钉' : 'GitHub'}登录成功！`)
@@ -42,9 +68,6 @@ export default function OAuthCallbackPage({ params }: { params: { provider: stri
           setTimeout(() => {
             router.push('/dashboard')
           }, 1000)
-        } else {
-          throw new Error('未返回访问令牌')
-        }
       } catch (err: any) {
         console.error('OAuth回调处理错误:', err)
         setError(err.message || '认证过程中出现错误')

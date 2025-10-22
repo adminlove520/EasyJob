@@ -36,7 +36,7 @@ class ThirdPartyAuthService:
         """处理钉钉回调，获取用户信息并生成令牌 - 根据官方文档修正"""
         try:
             # 1. 获取钉钉开放平台的appToken
-            token_response = await httpx.post(
+            token_response = httpx.post(
                 "https://oapi.dingtalk.com/sns/gettoken",
                 params={
                     "appid": settings.DINGTALK_CLIENT_ID,
@@ -51,7 +51,7 @@ class ThirdPartyAuthService:
             app_token = token_data.get("access_token")
             
             # 2. 使用临时授权码获取授权用户的持久授权码
-            persistent_code_response = await httpx.post(
+            persistent_code_response = httpx.post(
                 "https://oapi.dingtalk.com/sns/get_persistent_code",
                 params={"access_token": app_token},
                 json={"tmp_auth_code": code}
@@ -65,7 +65,7 @@ class ThirdPartyAuthService:
             persistent_code = persistent_code_data.get("persistent_code")
             
             # 3. 获取用户授权的snsToken
-            sns_token_response = await httpx.post(
+            sns_token_response = httpx.post(
                 "https://oapi.dingtalk.com/sns/get_sns_token",
                 params={
                     "appid": settings.DINGTALK_CLIENT_ID,
@@ -80,7 +80,7 @@ class ThirdPartyAuthService:
             sns_token = sns_token_data.get("sns_token")
             
             # 4. 使用snsToken获取用户信息
-            user_info_response = await httpx.post(
+            user_info_response = httpx.post(
                 "https://oapi.dingtalk.com/sns/getuserinfo",
                 params={"sns_token": sns_token},
                 json={
@@ -205,7 +205,7 @@ class ThirdPartyAuthService:
         """处理GitHub回调，获取用户信息并生成令牌"""
         try:
             # 1. 通过code获取access_token
-            token_response = await httpx.post(
+            token_response = httpx.post(
                 "https://github.com/login/oauth/access_token",
                 headers={"Accept": "application/json"},
                 json={
@@ -226,7 +226,7 @@ class ThirdPartyAuthService:
             access_token = token_data.get("access_token")
             
             # 2. 使用access_token获取用户信息
-            user_response = await httpx.get(
+            user_response = httpx.get(
                 "https://api.github.com/user",
                 headers={
                     "Authorization": f"token {access_token}",
@@ -237,7 +237,7 @@ class ThirdPartyAuthService:
             user_data = user_response.json()
             
             # 3. 获取用户邮箱信息
-            emails_response = await httpx.get(
+            emails_response = httpx.get(
                 "https://api.github.com/user/emails",
                 headers={
                     "Authorization": f"token {access_token}",
@@ -319,7 +319,7 @@ class ThirdPartyAuthService:
             logger.error(f"GitHub API请求异常: {str(e)}")
             return None
         except httpx.HTTPStatusError as e:
-            logger.error(f"GitHub API返回错误状态码: {e.response.status_code}, 响应: {await e.response.text()}")
+            logger.error(f"GitHub API返回错误状态码: {e.response.status_code}, 响应: {e.response.text()}")
             return None
         except json.JSONDecodeError as e:
             logger.error(f"GitHub API响应解析失败: {str(e)}")

@@ -40,7 +40,7 @@ interface Resume {
 }
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth()
+  const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [uploadLoading, setUploadLoading] = useState(false)
@@ -55,11 +55,52 @@ export default function DashboardPage() {
     setMounted(true)
   }, [])
 
+  // 获取cookie中的token
+  const getCookieToken = (): string | null => {
+    const cookie = document.cookie;
+    const cookieMatch = cookie.match(/access_token=([^;]+)/);
+    return cookieMatch ? cookieMatch[1] : null;
+  }
+
+  // 获取token（优先从cookie，其次从localStorage）
+  const getToken = (): string | null => {
+    return getCookieToken() || localStorage.getItem('access_token');
+  }
+
   useEffect(() => {
-    if (mounted && !isLoading && !isAuthenticated) {
-      router.push('/login')
+    if (mounted) {
+      const token = getToken()
+      console.log('Dashboard auth check, token exists:', !!token, 'isAuthenticated:', isAuthenticated, 'isLoading:', isLoading)
+      
+      // 修改认证检查逻辑：优先信任AuthProvider的isAuthenticated状态
+      // 如果isAuthenticated为true，说明用户已认证，不需要重定向
+      if (isAuthenticated) {
+        console.log('User is authenticated, proceeding to dashboard')
+        return
+      }
+      
+      // 如果isLoading为true，说明正在认证过程中，等待完成
+      if (isLoading) {
+        console.log('Authentication in progress, waiting...')
+        return
+      }
+      
+      // 如果有token但未认证且不在加载中，尝试刷新用户信息
+      if (token) {
+        console.log('Token exists but not authenticated, refreshing user...')
+        refreshUser().catch(err => {
+          console.error('Failed to refresh user:', err)
+          // 注意：不再直接移除token并重定向，让AuthProvider决定token的有效性
+          // 只在确实需要时才移除token
+          router.push('/login')
+        })
+      } else {
+        // 没有token且未认证，才重定向到登录页
+        console.log('No token and not authenticated, redirecting to login')
+        router.push('/login')
+      }
     }
-  }, [mounted, isLoading, isAuthenticated, router])
+  }, [mounted, isAuthenticated, isLoading, router, refreshUser])
 
   // 获取简历列表
   const fetchResumes = async () => {

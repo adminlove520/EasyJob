@@ -187,10 +187,14 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="btn-secondary w-full"
-                onClick={() => window.location.href = '/api/v1/auth/dingtalk/login'}
+                onClick={() => {
+                  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  window.location.href = `${apiBaseUrl}/api/v1/auth/dingtalk/login`;
+                }}
               >
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2.5 8c0-1.38.82-2.5 2-3s2.62.62 3 2-.82 2.5-2 3-2.62-.62-3-2zm2.5 6c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#FF8C00"/>
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="#FFFFFF">
+                  <rect x="3" y="3" width="18" height="18" rx="4" fill="#FF8C00"/>
+                  <path d="M7.5 10.5h9v3h-9zM7.5 15h5.25v3H7.5z" fill="#FFFFFF"/>
                 </svg>
                 钉钉
               </button>
@@ -198,7 +202,10 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="btn-secondary w-full"
-                onClick={() => window.location.href = '/api/v1/auth/github/login'}
+                onClick={() => {
+                  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  window.location.href = `${apiBaseUrl}/api/v1/auth/github/login`;
+                }}
               >
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.024-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.098.118.112.221.083.343-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.747 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z"/>
